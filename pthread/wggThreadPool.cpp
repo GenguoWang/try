@@ -36,7 +36,7 @@ void *threadWork(void *data)
         cout << "get:" << a << endl;
    }
    pthread_mutex_unlock (&mutexsum);
-   //if(hasValue) td->dowork((void*)a);
+   if(hasValue) td->dowork((void*)a);
    
    pthread_exit(NULL);
 }
@@ -56,7 +56,6 @@ public:
             td->q = &task;
             td->dowork = dowork;
               rc = pthread_create(&threads[t], NULL, threadWork, (void *)td);
-              //sleep(1);
               if (rc){
                  printf("ERROR; return code from pthread_create() is %d\n", rc);
                  exit(-1);
@@ -69,10 +68,10 @@ void todo(void * num)
 {
     cout << "work:" << (long)num << endl;
 }
+ThreadPool tp;
 int main(int argc, char *argv[])
 {
 pthread_mutex_init(&mutexsum, NULL);
-    ThreadPool tp;
     tp.dowork = todo;
     tp.task.push(1);
     tp.task.push(2);
@@ -80,6 +79,6 @@ pthread_mutex_init(&mutexsum, NULL);
     tp.task.push(4);
     tp.task.push(5);
     tp.start();
-   // pthread_mutex_destroy(&mutexsum);
+   pthread_mutex_destroy(&mutexsum);
    pthread_exit(NULL);
 }
