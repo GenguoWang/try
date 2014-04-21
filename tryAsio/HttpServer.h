@@ -106,7 +106,7 @@ private:
         }
         if(prePos<contentStr.size())
         {
-            form.insert(parseKV(contentStr.substr(prePos,prePos)));
+            form.insert(parseKV(contentStr.substr(prePos)));
         }
         isContentParsed = true;
     }
