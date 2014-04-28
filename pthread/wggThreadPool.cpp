@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <queue>
 #define NTHREADS 4
-#define NUM_THREADS 5
+#define NUM_THREADS 2
 #define N 1000
 #define MEGEXTRA 1000000
  
@@ -28,6 +28,7 @@ void *threadWork(void *data)
    int a;
     pthread_mutex_lock (&mutexsum);
     printf("q address tid%d :%x\n",td->t,td->q);
+        cout << "get:" << td->q->front() << endl;
    if(!td->q->empty())
    { 
         a = td->q->front();
