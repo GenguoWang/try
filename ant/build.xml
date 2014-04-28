@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<project name="Try" default="run">
+	<target name="init">
+		<mkdir dir="build"/>
+	</target>
+	<target name="compile" depends="init">
+		<javac srcdir="src" destdir="build" includeantruntime="yes"/>
+	</target>
+	<target name="run" depends="compile">
+		<java classpath="build" classname="Try"/>
+	</target>
+</project>
