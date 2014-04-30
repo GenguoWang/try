@@ -11,6 +11,7 @@ public:
     {
         cout << "here" << endl;
     }
+    struct NN{};
 };
 
 class A:public Base
@@ -28,6 +29,7 @@ void todo(Base b)
 }
 int main()
 {
+    Base::NN pp;
     Base b;
     todo(b);
     A a;
