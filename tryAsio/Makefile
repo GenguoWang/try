@@ -9,5 +9,5 @@ tcpSyncServer:tcpSyncServer.cpp
 	$(CXX) $(INCPATH) -o $@ $^ $(LIBPATH) $(CXXLDFLAGS)
 tcpClient:tcpClient.cpp
 	$(CXX) $(INCPATH) -o $@ $^ $(LIBPATH) $(CXXLDFLAGS)
-httpServer:httpServer.cpp
-	$(CXX) $(INCPATH) -o $@ $^ $(LIBPATH) $(CXXLDFLAGS)
+httpServer:httpServer.cpp HttpServer.h
+	$(CXX) $(INCPATH) -o $@ httpServer.cpp $(LIBPATH) $(CXXLDFLAGS)

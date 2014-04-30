@@ -1,3 +1,4 @@
+#include <string>
 namespace HttpUtility  
 {  
      
@@ -13,9 +14,9 @@ namespace HttpUtility
         return isdigit(x) ? x-'0' : x-'A'+10;  
     }  
    
-    inline string URLEncode(const string &sIn)  
+    inline std::string URLEncode(const std::string &sIn)  
     {  
-        string sOut;  
+        std::string sOut;  
         for( size_t ix = 0; ix < sIn.size(); ix++ )  
         {        
             BYTE buf[4];  
@@ -39,9 +40,9 @@ namespace HttpUtility
         return sOut;  
     };  
   
-    inline string URLDecode(const string &sIn)  
+    inline std::string URLDecode(const std::string &sIn)  
     {  
-        string sOut;  
+        std::string sOut;  
         for( size_t ix = 0; ix < sIn.size(); ix++ )  
         {  
             BYTE ch = 0;  
