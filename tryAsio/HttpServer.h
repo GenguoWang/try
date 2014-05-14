@@ -156,7 +156,7 @@ private:
 class HttpResponse
 {
 public:
-    HttpResponse(tcp::socket *psocket):isHeadWrited(false),psocket(psocket),head("HTTP/1.1 200 OK") {}
+    HttpResponse(tcp::socket *psocket):isHeadWrited(false),psocket(psocket),head("HTTP/1.1 200 OK\r\nstatus: 200 OK") {}
     void write(string data)
     {
         boost::system::error_code ignored_error;
@@ -226,6 +226,7 @@ public:
                 f(&his,&rep);
                 std::cout << "endhere" << std::endl;
                 his.outputHeader();
+                socket.close();
               }
           }
         }

@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <vector>
 #include <map>
+#include <sstream>
 using boost::asio::ip::tcp;
 
 class HttpClient
@@ -28,6 +29,8 @@ private:
         return str;
     }
 public:
+    std::string resHeadStr;
+    std::string resBodyStr;
     struct ReqAddr
     {
         std::string host;
@@ -98,16 +101,14 @@ public:
         ReqAddr addr;
         parseUrl(url,addr);
         head["Host"] = addr.host+":"+addr.port;
-        std::cout << head["Host"] << std::endl;
         std::string formStr = getFormStr(kv);
-        std::cout << head["Host"] << std::endl;
-        //head["Content-Length"] = std::string((int)(formStr.size()));
-        std::cout << formStr<< std::endl;
+        std::ostringstream oStream;
+        oStream << formStr.size();
+        head["Content-Length"] = oStream.str();
         return send(addr.host,addr.port,"POST "+addr.path+" HTTP/1.1\r\n"+headStr()+"\r\n"+formStr);
     }
-    static std::string send(std::string host,std::string port,std::string message)
+    std::string send(std::string host,std::string port,std::string message)
     {
-        std::cout << message << std::endl;
         boost::asio::io_service io_service;
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(host, port);
@@ -132,6 +133,10 @@ public:
             else if (error)
                 throw boost::system::system_error(error); // Some other error.
         }
-        return std::string(data.begin(),data.end());
+        std::string res = std::string(data.begin(),data.end());
+        int pos = res.find("\r\n\r\n");
+        resHeadStr = res.substr(0,pos);
+        resBodyStr = res.substr(pos+4);
+        return resBodyStr;
     }
 };

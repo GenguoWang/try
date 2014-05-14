@@ -14,3 +14,5 @@ httpServer:httpServer.cpp HttpServer.h
 	$(CXX) $(INCPATH) -o $@ httpServer.cpp $(LIBPATH) $(CXXLDFLAGS)
 httpClient:httpClient.cpp HttpClient.h
 	$(CXX) $(CXXFLAG) $(INCPATH) -o $@ httpClient.cpp $(LIBPATH) $(CXXLDFLAGS)
+asyncHttpClient:asyncHttpClient.cpp
+	$(CXX) $(CXXFLAG) $(INCPATH) -o $@ asyncHttpClient.cpp $(LIBPATH) $(CXXLDFLAGS)
