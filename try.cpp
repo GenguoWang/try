@@ -1,96 +1,34 @@
 #include <iostream>
 #include <vector>
+#include <cstdio>
 using namespace std;
-class Ttt
+class String
 {
-   public:
-   ~Ttt()
-   {
-    cout <<"dd"<<endl;
-   }
+private:
+    char data[10];
+public:
+    operator char *()
+    {
+        return data;
+    }
+    ~String()
+    {
+        data[0] = 'w';
+        data[1] = '\0';
+        cout << "DD" << endl;
+    }
+    friend String operator +(String &, String &);
 };
-struct Wgg
+String operator +(String& s1, String &s2)
 {
-    
-    int w;
-    char c;
-    Wgg * next;
-};
+    String str;
+    str.data[0] = 'n';
+    str.data[1] = '\0';
+    return str;
+}
 int main(int argc,char * argv[])
 {
-    Ttt * p = new Ttt[10];
-    //delete [] p;
-    Ttt *q = p;
-    //delete  [] (q+1);
-    cout << "hello github" << endl;
-    cout << sizeof(Wgg) << endl;
-    vector<Wgg> nn(3);
-    nn[0].next = &nn[1];
-    nn[1].w = 2;
-    cout << &nn[0] << ' ' <<&nn[1] << endl;
-    cout << &nn[0] << ' ' <<&nn[1] << endl;
-    cout << &nn[0].next  << endl;
-    cout << nn[0].next->w  << endl;
-    cout << &nn[1] - &nn[0] << endl;
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    nn.push_back(Wgg());
-    cout << &nn[0] <<' '<< &nn[1] << endl;
-    cout << &nn[0].next  << endl;
-    cout << nn[0].next->w  << endl;
-    cout << nn[1].w  << endl;
+    String s1, s2;
+    cout << s1 + s2;
+    return 0;
 }
