@@ -26,9 +26,22 @@ String operator +(String& s1, String &s2)
     str.data[1] = '\0';
     return str;
 }
+void foo() //throw(int)
+{
+    throw("abc");
+}
 int main(int argc,char * argv[])
 {
-    String s1, s2;
-    cout << s1 + s2;
+    try{
+        foo();
+    }
+    catch(int &a)
+    {
+        cout << a << endl;
+    }
+    catch(const char* p)
+    {
+        cout << p << endl;
+    }
     return 0;
 }

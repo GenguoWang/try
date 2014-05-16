@@ -10,10 +10,12 @@
 
 #include <iostream>
 #include <istream>
+#include <sstream>
 #include <ostream>
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -21,9 +23,11 @@ class client
 {
 public:
   client(boost::asio::io_service& io_service,
-      const std::string& server, const std::string& path,const std::string &port)
+      const std::string& server, const std::string &port,const std::string message,boost::function<void(const std::string &)> f)
     : resolver_(io_service),
-      socket_(io_service)
+      socket_(io_service),
+      request_(message),
+      callback(f)
   {
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
@@ -32,8 +36,7 @@ public:
     request_stream << "GET " << path << " HTTP/1.0\r\n";
     request_stream << "Host: " << server << "\r\n";
     request_stream << "Accept: */*\r\n";
-    //request_stream << "Connection: close\r\n\r\n";
-    request_stream << "Connection: keep-alive\r\n\r\n";
+    request_stream << "Connection: close\r\n\r\n";
 
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
@@ -58,7 +61,7 @@ private:
     }
     else
     {
-      std::cout << "Error1: " << err.message() << "\n";
+      throw boost::system::system_error(err); 
     }
   }
 
@@ -73,7 +76,7 @@ private:
     }
     else
     {
-      std::cout << "Error2: " << err.message() << "\n";
+      throw boost::system::system_error(err); 
     }
   }
 
@@ -90,7 +93,7 @@ private:
     }
     else
     {
-      std::cout << "Error3: " << err.message() << "\n";
+      throw boost::system::system_error(err); 
     }
   }
 
@@ -108,14 +111,11 @@ private:
       std::getline(response_stream, status_message);
       if (!response_stream || http_version.substr(0, 5) != "HTTP/")
       {
-        std::cout << "Invalid response\n";
-        return;
+        throw std::runtime_error("Invalid response"); 
       }
       if (status_code != 200)
       {
-        std::cout << "Response returned with status code ";
-        std::cout << status_code << "\n";
-        return;
+        throw std::runtime_error("Response returned with status code"+ status_code);
       }
 
       // Read the response headers, which are terminated by a blank line.
@@ -125,7 +125,7 @@ private:
     }
     else
     {
-      std::cout << "Error4: " << err << "\n";
+      throw boost::system::system_error(err); 
     }
   }
 
@@ -152,16 +152,17 @@ private:
     }
     else
     {
-      std::cout << "Error5: " << err << "\n";
+      throw boost::system::system_error(err); 
     }
   }
 
   void handle_read_content(const boost::system::error_code& err)
   {
+    std::ostringstream ostr;
     if (!err)
     {
       // Write all of the data that has been read so far.
-      std::cout << &response_;
+      ostr << &response_;
 
       // Continue reading remaining data until EOF.
       boost::asio::async_read(socket_, response_,
@@ -169,23 +170,32 @@ private:
           boost::bind(&client::handle_read_content, this,
             boost::asio::placeholders::error));
     }
-    else if (err != boost::asio::error::eof)
+    else if(err == boost::asio::error::eof)
     {
-      std::cout << "Error6: " << err << "\n";
+        callback(ostr.str());
+    }
+    else
+    {
+      throw boost::system::system_error(err); 
     }
   }
 
   tcp::resolver resolver_;
   tcp::socket socket_;
-  boost::asio::streambuf request_;
+  std::string request_;
   boost::asio::streambuf response_;
+  boost::function<void(const std::string &)> callback;
 };
 
+void callback(const std::string & str)
+{
+    std::cout << str << std::endl;
+}
 int main(int argc, char* argv[])
 {
   try
   {
-    if (argc != 4)
+    if (argc != 5)
     {
       std::cout << "Usage: async_client <server> <port> <path>\n";
       std::cout << "Example:\n";
@@ -194,7 +204,8 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
-    client c(io_service, argv[1], argv[3],argv[2]);
+    client c(io_service, argv[1], argv[3],argv[2],callback);
+    client d(io_service, argv[1], argv[3],argv[4],callback);
     std::cout << "wgg" << std::endl;
     io_service.run();
     sleep(1);

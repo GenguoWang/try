@@ -6,11 +6,11 @@ void handle(int x,const HttpRequest *req,HttpResponse *resp)
     sleep(3);
     resp->write("<b>wgg</b>aaaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccddddddddddddddddddd");
 }
-int main()
+int main(int argc,char *argv[])
 {
   try
   {
-    HttpServer server(8088);
+    HttpServer server(atoi(argv[1]));
     boost::function<void(const HttpRequest *,HttpResponse*)> f2;
     int a=100;
     f2 = boost::bind(handle,a,_1,_2);
