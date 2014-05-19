@@ -3,7 +3,6 @@
 #include <boost/function.hpp>
 void handle(int x,const HttpRequest *req,HttpResponse *resp)
 {
-    sleep(3);
     resp->write("<b>wgg</b>aaaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccddddddddddddddddddd");
 }
 int main(int argc,char *argv[])

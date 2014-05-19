@@ -162,7 +162,8 @@ private:
     if (!err)
     {
       // Write all of the data that has been read so far.
-      ostr << &response_;
+      //ostr << &response_;
+      std::out << &response_;
 
       // Continue reading remaining data until EOF.
       boost::asio::async_read(socket_, response_,

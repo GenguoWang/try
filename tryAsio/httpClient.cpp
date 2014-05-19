@@ -13,7 +13,9 @@ int main(int argc,char *argv[])
     map<string,string> kv;
     kv[argv[2]] = argv[3];
     cout << "hhh" << endl;
-    hc.asyncPost(argv[1],kv,callback);
+    //hc.asyncPost(argv[1],kv,callback);
+    cout << hc.get(argv[1]);
+    hc.asyncGet(argv[1],callback);
     hc.run();
     return 0;
 }

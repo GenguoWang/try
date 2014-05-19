@@ -120,17 +120,14 @@ private:
     if (!err)
     {
       // Process the response headers.
-      /*
       std::istream response_stream(&response_);
       std::string header;
       while (std::getline(response_stream, header) && header != "\r")
-        std::cout << header << "\n";
-      std::cout << "\n";
+        ;
 
       // Write whatever content we already have to output.
       if (response_.size() > 0)
-        std::cout << &response_;
-      */
+        ostr << &response_;
 
       // Start reading remaining data until EOF.
       boost::asio::async_read(socket_, response_,
@@ -146,7 +143,6 @@ private:
 
   void handle_read_content(const boost::system::error_code& err)
   {
-    std::ostringstream ostr;
     if (!err)
     {
       // Write all of the data that has been read so far.
@@ -173,6 +169,7 @@ private:
   std::string request_;
   boost::asio::streambuf response_;
   boost::function<void(const std::string &)> callback;
+  std::ostringstream ostr;
 };
 
 class HttpClient
