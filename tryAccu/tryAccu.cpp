@@ -107,6 +107,7 @@ public:
             splitSet[index/num].insert(*it);
         }
         std::vector<OneSetProof> proof;
+                /*
         for(unsigned i=0;i<splitSet.size();++i)
         {
             std::set<ZZ> tmpSet = splitSet[i];
@@ -128,7 +129,7 @@ public:
             }
             proof.push_back(oneProof);
         }
-                /*
+                */
         for(unsigned i=0;i<splitSet.size();++i)
         {
             std::set<ZZ> &tmpSet = splitSet[i];
@@ -142,15 +143,6 @@ public:
                 std::set<ZZ> tmpSubPrimeSet = pm.getPrime(tmpSet);
                 ZZ proof = a.publicGenSubsetProof(tmpAllPrimeSet, tmpSubPrimeSet);
                 accu = t[j+1][index];
-                if(accu != a.privateAccumulate(tmpAllPrimeSet))
-                {
-                    cout << j << endl;
-                    cout << proof << endl;
-                    cout << accu << endl;
-                    cout << a.privateAccumulate(tmpAllPrimeSet)<<endl;
-                    return ;
-                }
-                tmpSet.insert(accu);
                 oneProof.proofs.push_back(std::make_pair(proof,accu));
             }
             for(int j=1;j<e;++j)
@@ -162,7 +154,6 @@ public:
             }
             proof.push_back(oneProof);
         }
-                */
         verifyProof(subSet,proof,a);
     }
     bool verifyProof(std::set<ZZ> &subSet,std::vector<OneSetProof> &proof,RSAAccumulator &a)
@@ -237,16 +228,6 @@ public:
                 t[i].push_back(a.privateAccumulate(tmpSet));
             }
         }
-        /*
-        for(int i=level-1;i>=0;--i)
-        {
-            for(size_t j=0;j<t[i].size();++j)
-            {
-                cout << t[i][j] << " ";
-            }
-            cout << endl;
-        }
-        */
         finalAccu = t[e][0];
         cout << "number: " << n << " weight: " << num << endl;
         //checkTree(a);
