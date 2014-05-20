@@ -13,7 +13,7 @@
 using std::cout;
 using std::endl;
 const int SET_SIZE=10000;
-const int SUB_SIZE=9000;
+//const int SUB_SIZE=9000;
 double get_time()
 {
     timeval tv;
@@ -75,6 +75,7 @@ int n;
 std::vector<vector<ZZ> > t;
 std::map<ZZ,int> eleIndex;
 std::vector<vector<ZZ> > preProof;
+std::vector<OneSetProof> proof;
 ZZ finalAccu;
 private:
     std::set<ZZ> getPrimeSet(int level,int index)
@@ -96,6 +97,7 @@ public:
     }
     void buildProof(std::set<ZZ> &subSet,RSAAccumulator &a)
     {
+        proof.clear();
         std::vector<std::set<ZZ> > splitSet((n-1)/num+1);
         for(std::set<ZZ>::iterator it = subSet.begin();it != subSet.end();++it)
         {
@@ -106,30 +108,6 @@ public:
             int index = eleIndex[*it];
             splitSet[index/num].insert(*it);
         }
-        std::vector<OneSetProof> proof;
-                /*
-        for(unsigned i=0;i<splitSet.size();++i)
-        {
-            std::set<ZZ> tmpSet = splitSet[i];
-            if(tmpSet.empty())continue;
-            OneSetProof oneProof;
-            oneProof.oneset = tmpSet;
-            ZZ accu;
-            int index = i;
-            for(int j=0;j<e;++j)
-            {
-                std::set<ZZ> tmpAllPrimeSet = getPrimeSet(j,index);
-                std::set<ZZ> tmpSubPrimeSet = pm.getPrime(tmpSet);
-                ZZ proof = a.publicGenSubsetProof(tmpAllPrimeSet, tmpSubPrimeSet);
-                accu = t[j+1][index];
-                tmpSet.clear();
-                tmpSet.insert(accu);
-                oneProof.proofs.push_back(std::make_pair(proof,accu));
-                index = index/num;
-            }
-            proof.push_back(oneProof);
-        }
-                */
         for(unsigned i=0;i<splitSet.size();++i)
         {
             std::set<ZZ> &tmpSet = splitSet[i];
@@ -154,9 +132,8 @@ public:
             }
             proof.push_back(oneProof);
         }
-        //verifyProof(subSet,proof,a);
     }
-    bool verifyProof(std::set<ZZ> &subSet,std::vector<OneSetProof> &proof,RSAAccumulator &a)
+    bool verifyProof(std::set<ZZ> &subSet,RSAAccumulator &a)
     {
         //check all element appears in proof
         std::set<ZZ> checkSet;
@@ -284,14 +261,20 @@ int main()
         tmp = i;
         allSet.insert(tmp);   
     }
+    std::set<ZZ> primeAll = pr.getPrime(allSet);
+    ZZ accu = a.privateAccumulate(primeAll);
     double timeMat1[10][10];
     double timeMat2[10][10];
+    double timeMat3[10][10];
+    double timeMat4[10][10];
     for(int iE=2;iE<8;++iE)
     {
         TreeProof tp(iE,pr);
         tp.init(allSet,a);
         for(int i=0;i<10;++i)timeMat1[iE][i]= 0;
         for(int i=0;i<10;++i)timeMat2[iE][i]= 0;
+        for(int i=0;i<10;++i)timeMat3[iE][i]= 0;
+        for(int i=0;i<10;++i)timeMat4[iE][i]= 0;
         for(int testNum = SET_SIZE/100,caseNum=0; testNum < SET_SIZE; testNum *= 2,caseNum++)
         {
             for(int ii=0;ii<10;++ii)
@@ -312,22 +295,22 @@ int main()
                         subSet.insert(tmp);
                     }
                 }
-                double start_time;
+                double start_time,time_point1,time_point2;
                 start_time = get_time();
                 tp.buildProof(subSet,a);
-                double time1 = get_time()-start_time;
+                time_point1 = get_time();
+                tp.verifyProof(subSet,a);
+                time_point2 = get_time();
+                double buildtime1 = time_point1-start_time;
+                double prooftime1 = time_point2-time_point1;
 
-                ZZ z,accu,proof;
+                ZZ z,proof;
 
                 start_time = get_time();
                 std::set<ZZ> primeAll = tp.pm.getPrime(allSet);
                 std::set<ZZ> primeSubset = tp.pm.getPrime(subSet);
                 proof = a.publicGenSubsetProof(primeAll, primeSubset);
-                double time2 = get_time()-start_time;
-                timeMat1[iE][caseNum] += time1;
-                timeMat2[iE][caseNum] += time2;
-                /*
-                accu = a.privateAccumulate(primeAll);
+                time_point1 = get_time();
                 if(a.verifySubsetProof(primeSubset, proof, accu))
                 {
                     std::cout << "OK" << std::endl;
@@ -336,10 +319,23 @@ int main()
                 {
                     std::cout << "Failed" << std::endl;
                 }
-                */
+                time_point2 = get_time();
+                double buildtime2 = time_point1-start_time;
+                double prooftime2 = time_point2-time_point1;
+                timeMat1[iE][caseNum] += buildtime1;
+                timeMat2[iE][caseNum] += prooftime1;
+                timeMat3[iE][caseNum] += buildtime2;
+                timeMat4[iE][caseNum] += prooftime2;
+                cout << "tick: " << buildtime1 << " " <<prooftime1 << " "
+                << buildtime2 << " " << prooftime2 << endl;
             }
             timeMat1[iE][caseNum] /= 10;
             timeMat2[iE][caseNum] /= 10;
+            timeMat3[iE][caseNum] /= 10;
+            timeMat4[iE][caseNum] /= 10;
+            cout << "size: " << testNum 
+            << " tree: " << timeMat1[iE][caseNum] << " " << timeMat2[iE][caseNum]
+            <<" origin: " << timeMat3[iE][caseNum]<< " " << timeMat4[iE][caseNum] << endl;
         }
     }
     for(int iE=2;iE<8;++iE)
@@ -347,7 +343,9 @@ int main()
         cout << "e=" << iE << endl;
         for(int testNum = SET_SIZE/100,caseNum=0; testNum < SET_SIZE; testNum *= 2,caseNum++)
         {
-            cout << "size: " << testNum << " tree: " << timeMat1[iE][caseNum] << " origin: " << timeMat2[iE][caseNum]<< endl;
+            cout << "size: " << testNum 
+            << " tree: " << timeMat1[iE][caseNum] << " " << timeMat2[iE][caseNum]
+            <<" origin: " << timeMat3[iE][caseNum]<< " " << timeMat4[iE][caseNum] << endl;
         }
     }
     return 0;
