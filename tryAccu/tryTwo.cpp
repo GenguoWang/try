@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <map>
 #include <stdexcept>
@@ -13,12 +14,12 @@
 #include <sys/time.h>
 #include "PrimeManager.h"
 #include "TreeProof.h"
-#include "TwoLevelProof.h"
+#include "VTwoLevelProof.h"
 using std::cout;
 using std::endl;
-const int SET_SIZE=10000;
+const int SET_SIZE=1000;
 //const int SUB_SIZE=9000;
-const int NUM=100;
+const int NUM=10;
 double get_time()
 {
     timeval tv;
@@ -48,11 +49,27 @@ int main()
     double timeMat2[10];
     double timeMat3[10];
     double timeMat4[10];
-    TwoLevelProof tlp(allSet,NUM,pm,a);
+    double psize[10];
+    double init_start = get_time();
+    VTwoLevelProof tlp(primeAll,NUM,pm,a);
+    ofstream out("wgg.dat");
+    tlp.saveToStream(out);
+    out.close();
+
+    /*
+    ifstream in("wgg.dat");
+    VTwoLevelProof tlp(primeAll,NUM,in,a);
+    in.close();
+    */
+
+    double init_end = get_time();
+    cout << "inited,time:" << init_end - init_start << endl;
+
     for(int i=0;i<10;++i)timeMat1[i]= 0;
     for(int i=0;i<10;++i)timeMat2[i]= 0;
     for(int i=0;i<10;++i)timeMat3[i]= 0;
     for(int i=0;i<10;++i)timeMat4[i]= 0;
+    for(int i=0;i<10;++i)psize[i]= 0;
     for(int testNum = SET_SIZE/100,caseNum=0; testNum < SET_SIZE; testNum *= 2,caseNum++)
     {
         for(int ii=0;ii<10;++ii)
@@ -75,9 +92,10 @@ int main()
             }
             double start_time,time_point1,time_point2;
             start_time = get_time();
-            tlp.buildProof(subSet);
+            tlp.buildProof(pm.getPrime(subSet));
             time_point1 = get_time();
-            tlp.verifyProof(subSet);
+            psize[caseNum] += tlp.getProofSize();
+            tlp.verifyProof(pm.getPrime(subSet));
             time_point2 = get_time();
             double buildtime1 = time_point1-start_time;
             double prooftime1 = time_point2-time_point1;
@@ -111,16 +129,18 @@ int main()
         timeMat2[caseNum] /= 10;
         timeMat3[caseNum] /= 10;
         timeMat4[caseNum] /= 10;
+        psize[caseNum] /= 10;
         cout << "size: " << testNum 
         << " tree: " << timeMat1[caseNum] << " " << timeMat2[caseNum]
         <<" origin: " << timeMat3[caseNum]<< " " << timeMat4[caseNum] << endl;
     }
     cout << "result:" <<  endl;
+    cout << "size\tpsize\ttree\t\torigin"<<endl;
     for(int testNum = SET_SIZE/100,caseNum=0; testNum < SET_SIZE; testNum *= 2,caseNum++)
     {
-        cout << "size: " << testNum 
-        << " tree: " << timeMat1[caseNum] << " " << timeMat2[caseNum]
-        <<" origin: " << timeMat3[caseNum]<< " " << timeMat4[caseNum] << endl;
+        cout << testNum 
+        << "\t" << psize[caseNum] <<"\t" <<timeMat1[caseNum] << "\t" << timeMat2[caseNum]
+        <<"\t" << timeMat3[caseNum]<< "\t" << timeMat4[caseNum] << endl;
     }
     return 0;
 }

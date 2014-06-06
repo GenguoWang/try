@@ -1,15 +1,15 @@
-#ifndef _TWOLEVELPROOF_H_
-#define _TWOLEVELPROOF_H_
+#ifndef _VTWOLEVELPROOF_H_
+#define _VTWOLEVELPROOF_H_
 
-class TwoLevelProof
+class VTwoLevelProof
 {
 private:
     int num;
     int n;
-    PrimeManager &pm;
     std::map<ZZ,int> eleIndex;
     std::vector<vector<ZZ> > t;
-    std::vector<vector<ZZ> > preProof;
+    std::vector<ZZ> preProof;
+    std::map<ZZ,ZZ> prePrime;
     RSAAccumulator &a;
     ZZ finalAccu;
     std::vector<OneSetProof> proof;
@@ -23,21 +23,41 @@ private:
             {
                 unsigned offset = index*num+i;
                 if(offset>=t[level].size())break;
-                result.insert(pm.getPrime(t[level][offset]));
+                result.insert(t[level][offset]);
             }
         }
         else if(level==1)
         {
-            for(unsigned i=0;i<t[level].size();++i) result.insert(pm.getPrime(t[level][i]));
-        }
-        else if(level==2)
-        {
-            result.insert(pm.getPrime(t[level][0]));
+            for(unsigned i=0;i<t[level].size();++i) result.insert(prePrime[t[1][i]]);
         }
         return result;
     }
 public:
-    TwoLevelProof(std::set<ZZ> &allSet,int num,PrimeManager &pm,RSAAccumulator &ac):num(num),pm(pm),t(3),preProof(3),a(ac)
+    void saveToStream(ostream &out)
+    {
+        out << t[2][0] << '\n';
+        out << t[1].size() << '\n';
+        for(unsigned i=0;i < t[1].size();++i)
+        {
+            out << t[1][i] << ' ' << preProof[i] << ' ' << prePrime[t[1][i]] << '\n';
+        }
+    }
+    void loadFromStream(istream &in)
+    {
+        ZZ accu,prf,prm;
+        in >> accu;
+        t[2].push_back(accu);
+        int size;
+        in >> size;
+        for(int i=0;i<size;++i)
+        {
+            in >> accu >> prf >> prm;
+            t[1].push_back(accu);
+            preProof.push_back(prf);
+            prePrime[accu] = prm;
+        }
+    }
+    VTwoLevelProof(std::set<ZZ> &allSet,int num,PrimeManager &pm,RSAAccumulator &ac):num(num),t(3),a(ac)
     {
         n = allSet.size();
         //cout << "TLP: " << n << " size of set" << endl;
@@ -57,19 +77,37 @@ public:
             tmpSet = getPrimeSet(0,j);
             //cout << "tmpSet:" << endl;
             //outputSet(tmpSet);
-            t[1].push_back(a.privateAccumulate(tmpSet));
+            ZZ tmpAccu = a.privateAccumulate(tmpSet);
+            t[1].push_back(tmpAccu);
+            prePrime[tmpAccu] = pm.getPrime(tmpAccu);
         }
+        
         //cout << "TLP: level 1 inited" << endl;
         tmpSet = getPrimeSet(1,0);
         a.setSet(tmpSet);
         t[2].push_back(a.privateAccumulate(tmpSet));
         for(unsigned i=0;i<t[1].size();++i)
         {
-            preProof[1].push_back(a.publicGenProof(pm.getPrime(t[1][i])));
+            preProof.push_back(a.publicGenProof(prePrime[t[1][i]]));
         }
         finalAccu = t[2][0];
     }
-    void buildProof(std::set<ZZ> &subSet)
+
+    VTwoLevelProof(std::set<ZZ> &allSet,int num,istream &in,RSAAccumulator &ac):num(num),t(3),a(ac)
+    {
+        n = allSet.size();
+        int tmpCnt=0;
+        for(std::set<ZZ>::iterator it = allSet.begin();it != allSet.end();++it)
+        {
+            t[0].push_back(*it);
+            eleIndex[*it] = tmpCnt;
+            tmpCnt++;
+        }
+        loadFromStream(in);
+        finalAccu = t[2][0];
+    }
+    
+    void buildProof(const std::set<ZZ> &subSet)
     {
         
         proof.clear();
@@ -92,19 +130,18 @@ public:
 
             ZZ accu,tmpproof;
             std::set<ZZ> tmpAllPrimeSet = getPrimeSet(0,i);
-            std::set<ZZ> tmpSubPrimeSet = pm.getPrime(tmpSet);
-            tmpproof = a.publicGenSubsetProof(tmpAllPrimeSet, tmpSubPrimeSet);
+            tmpproof = a.publicGenSubsetProof(tmpAllPrimeSet, tmpSet);
             accu = t[1][i];
             oneProof.proofs.push_back(std::make_pair(tmpproof,accu));
 
-            tmpproof = preProof[1][i];
+            tmpproof = preProof[i];
             accu = t[2][0];
             oneProof.proofs.push_back(std::make_pair(tmpproof,accu));
 
             proof.push_back(oneProof);
         }
     }
-    bool verifyProof(std::set<ZZ> &subSet)
+    bool verifyProof(const std::set<ZZ> &subSet)
     {
         //check all element appears in proof
         std::set<ZZ> checkSet;
@@ -124,16 +161,18 @@ public:
         for(unsigned i=0;i<proof.size();++i)
         {
             OneSetProof &oneProof = proof[i];
-            std::set<ZZ> primeSubset = pm.getPrime(oneProof.oneset);
+            std::set<ZZ> primeSubset = oneProof.oneset;
             for(int j=0;j<2;++j)
             {
+                cout << "verify:" << oneProof.proofs[j].first << " " << oneProof.proofs[j].second << endl;
+                
                 if(!a.verifySubsetProof(primeSubset, oneProof.proofs[j].first, oneProof.proofs[j].second))
                 {
                     std::cout << "Error:"<<j << std::endl;
                     return false;
                 }
                 primeSubset.clear(); 
-                primeSubset.insert(pm.getPrime(oneProof.proofs[j].second));
+                primeSubset.insert(prePrime[oneProof.proofs[j].second]);
             }
             if(finalAccu != oneProof.proofs[1].second)
             {
@@ -161,3 +200,4 @@ public:
     }
 };
 #endif
+
