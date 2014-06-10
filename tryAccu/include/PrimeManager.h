@@ -36,5 +36,16 @@ public:
             return p;
         }
     }
+    std::set<ZZ> getTermPrimeSet(int tid)
+    {
+        std::set<ZZ> result;
+        ZZ tmp;
+        for(int i=1;i<=200;++i)
+        {
+            tmp = i*tid;
+            result.insert(getPrime(tmp));
+        }
+        return result;
+    }
 };
 #endif

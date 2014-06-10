@@ -107,7 +107,7 @@ public:
         finalAccu = t[2][0];
     }
     
-    void buildProof(const std::set<ZZ> &subSet)
+    TreeProofResult buildProof(const std::set<ZZ> &subSet)
     {
         
         proof.clear();
@@ -140,6 +140,14 @@ public:
 
             proof.push_back(oneProof);
         }
+        TreeProofResult tpr(TreeProofResult::TYPE_TREE);
+        tpr.tProof = proof;
+        return tpr;
+    }
+    bool verifyProof(const std::set<ZZ> &subSet,const TreeProofResult &result)
+    {
+        proof = result.tProof;
+        return verifyProof(subSet);
     }
     bool verifyProof(const std::set<ZZ> &subSet)
     {
