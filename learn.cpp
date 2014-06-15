@@ -3,6 +3,10 @@
 #include <vector>
 #include <cassert>
 using namespace std;
+/*Constructor {{{*/
+namespace TestConstruct
+{
+
 class Test
 {
 public:
@@ -30,9 +34,47 @@ void testCopyConstructor()
     assert(t2.v == 10);
     assert(t3.v == 100);
 }
+
+}
+/*}}}*/
+/*Herch {{{*/
+namespace Hierch
+{
+
+class A
+{
+public:
+    virtual char name(){return 'A';}
+};
+class B:virtual public A
+{
+public:
+    virtual char name(){return 'B';}
+};
+
+class C:virtual public A
+{
+public:
+    virtual char name(){return 'C';}
+};
+
+class D:public B, public C
+{
+public:
+    virtual char name(){return 'D';}
+};
+
+char getChar(A* p) { return p->name();}
+void test()
+{
+    A * p = new D;
+    cout << getChar(p);
+}
+}
+/*}}}*/
 int main(int argc, char *argv[])
 {
-    testCopyConstructor();
+    Hierch::test();
 	return 0;
 }
 
