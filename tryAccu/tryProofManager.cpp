@@ -16,6 +16,7 @@
 #include "TreeProof.h"
 #include "VTwoLevelProof.h"
 #include "ProofManager.h"
+#include <sstream>
 using std::cout;
 int main()
 {
@@ -32,7 +33,13 @@ int main()
     test1.insert(1);
     std::set<ZZ> testPrime1 = pr.getPrime(test1);
     TreeProofResult tpr = proofManager.buildProof(1,testPrime1);
-    if(proofManager.verifyProof(1,testPrime1,tpr))
+    ostringstream ostr;
+    ostr << tpr;
+    TreeProofResult testr;
+    istringstream istr(ostr.str());
+    istr >> testr;
+    cout << tpr;
+    if(proofManager.verifyProof(1,testPrime1,testr))
     {
         cout << "PASS\n";
     }
