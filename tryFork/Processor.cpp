@@ -7,16 +7,36 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <stdexcept>
 using namespace std;
+struct Job
+{
+    int a,b;
+    void readFromStream(istream &in)
+    {
+        in >> a >> b;
+    }
+    void writeToStream(ostream &out)
+    {
+        out << a << " " << b;
+    }
+    string run()
+    {
+        ostringstream oStr;
+        oStr << a+b;
+        return oStr.str();
+    }
+}
 class Processor
 {
 protected:
-    int fd;
-    FILE *fp;
+    int mFd;
+    FILE *mFp;
 public:
-    Processor(int fd):fd(fd)
+    Processor(int fd):mFd(fd)
     {
-        fp = fdopen(fd,"rw");
+        mFp = fdopen(mFd,"rw");
     }
     virtual void run();
     virtual int acceptInput(std::string &input);
@@ -45,7 +65,7 @@ int Processor::acceptInput(string &input)
 {
     ostringstream out;
     int buf;
-    while((buf = fgetc(fp))!=EOF && buf != '\0')
+    while((buf = fgetc(mFp))!=EOF && buf != '\0')
     {
         out << (char)buf;
     }
@@ -54,14 +74,14 @@ int Processor::acceptInput(string &input)
 }
 void Processor::outputResult(string result)
 {
-    write(fd, result.c_str(), result.size()+1);// size()+1 to output the '\0'
+    write(mFd, result.c_str(), result.size()+1);// size()+1 to output the '\0'
 }
 
 
 class WorkerProcessor:public Processor
 {
 public:
-    WorkerProcessor(int fd):Processor(fd){}
+    WorkerProcessor(int pfd):Processor(pfd){}
     std::string work(std::string input);
 };
 
@@ -69,10 +89,52 @@ string WorkerProcessor::work(string input)
 {
     istringstream in(input);
     ostringstream out;
-    int a,b;
-    in >> a >> b;
-    out << a+b;
+    int size,a,b;
+    in >> size;
+    out << size;
+    for(int i=0; i<size; ++i)
+    {
+        in >> a >> b;
+        out << " "<< a+b;
+    }
     return out.str();
+}
+
+class ManageProcessor:Processor
+{
+private:
+    vector<int> workerFds;
+public:
+    ManageProcessor(int fd):Processor(fd){}
+    void addWorker(int fd);
+    std::string work(std::string input);
+};
+void ManageProcessor::addWorker(int fd)
+{
+    workerFds.push_back(fd);
+}
+string ManageProcessor::work(string input)
+{
+    int workerNum = workerFds.size();
+    if(workerNum==0) 
+    {
+        throw runtime_error("No worker is added");
+    }
+    vector<int> workingFd;
+    istringstream in(input);
+    ostringstream out;
+    int size,a,b;
+    in >> size;
+    if(size == 0) return string();
+    int oneJobNum = size / workerNum;
+    for(int i=0; i<size; ++i)
+    {
+        in >> a >> b;
+        out << " "<< a+b;
+    }
+    out << size;
+    return out.str();
+    
 }
 
 int createWorker()
@@ -97,7 +159,7 @@ int createWorker()
 int main()
 {
     int fd = createWorker();
-    string str = "10 25";
+    string str = "2 10 25 4 5";
     write(fd,str.c_str(),str.size()+1);
     char buf[100];
     read(fd,buf,100);
