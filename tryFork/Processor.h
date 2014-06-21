@@ -64,7 +64,10 @@ public:
     {
         write(mFd, result.c_str(), result.size()+1);// size()+1 to output the '\0'
     }
-    virtual ~Processor(){}
+    virtual ~Processor()
+    {
+        close(mFd);
+    }
 };
 
 

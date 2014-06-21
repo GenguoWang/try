@@ -17,7 +17,8 @@ void usePipe()
     if((pid=fork())==0)
     {
         //child
-        //close(pipeFd[1]);
+        close(pipeFd[1]);
+        close(pipeFd[1]);
         char buf[100];
         int num;
         if((num=read(pipeFd[0],buf,100))>0)
@@ -29,12 +30,13 @@ void usePipe()
         {
             cout << "child read failed" << endl;
         }
-        write(pipeFd[1],"Child",5);
+        //write(pipeFd[1],"Child",5);
     }
     else if(pid > 0)
     {
         //parent
-        //close(pipeFd[0]);
+        close(pipeFd[0]);
+        close(pipeFd[0]);
         if(write(pipeFd[1],"Hello",5)!=-1)
         {
             cout << "parent write success" << endl;
@@ -42,9 +44,9 @@ void usePipe()
         sleep(2);
         int num;
         char buf[100];
-        num = read(pipeFd[0],buf,100);
-        buf[num] = '\0';
-        cout << "parent read: " << buf << endl;
+        //num = read(pipeFd[0],buf,100);
+        //buf[num] = '\0';
+        //cout << "parent read: " << buf << endl;
         waitpid(pid,NULL,0);
     }
     else
