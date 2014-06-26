@@ -1,0 +1,3 @@
+Import('env')
+env.Program("testProcessor.cpp")
+env.Program(["testJobAccu.cpp","RSAAccumulator.cpp"],LIBS=['ntl'])

@@ -1,6 +1,0 @@
-import os
-env = Environment()
-env['CPPPATH'] = ['include','~/Software/include']
-env['LIBPATH'] = ['~/Software/lib']
-env.Program("testProcessor.cpp")
-env.Program(["testJobAccu.cpp","RSAAccumulator.cpp"],LIBS=['ntl'])
