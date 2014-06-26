@@ -25,9 +25,9 @@ void testClient()
         }
     }
     for(int i = 2; i<10000; ++i) if(arr[i]==0) primes.push_back(i);
-    int NUM=10;
-    int Sub=3;
-    int All=10;
+    int NUM=48;
+    int Sub=2;
+    int All=5;
     int size=primes.size();
     std::set<ZZ> sub;
     std::set<ZZ> all;

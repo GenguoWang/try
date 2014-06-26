@@ -8,7 +8,6 @@
 #include "RSAAccumulator.h"
 #include "HttpClient.h"
 #include "Processor.h"
-#define BUF_SIZE 10000
 class RSAAccumulatorService
 {
 private:
@@ -35,6 +34,7 @@ class ManageProccessorWrapper
 {
 private:
     int manageFd;
+    static const int BUF_SIZE=1048576;
 public:
     ManageProccessorWrapper(std::string name, int numOfWorker);
     std::vector<NTL::ZZ> calcProof(std::vector<ProofCalcJob> jobList);

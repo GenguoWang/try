@@ -88,7 +88,7 @@ void startProofCalcServer(int port)
 {
     cout << port << endl;
     HttpServer server(port);
-    ManageProccessorWrapper proccessor("main",3);
+    ManageProccessorWrapper proccessor("main",5);
     boost::function<void(HttpRequest *, HttpResponse *)> handle;
     handle = boost::bind(http_handle, &proccessor, _1, _2);
     server.run(handle);

@@ -60,7 +60,7 @@ void ProofCalcJob::setSubset(SetType z)
 
 ManageProccessorWrapper::ManageProccessorWrapper(string name, int numOfWorker)
 {
-    manageFd = ManageProcessor<ProofCalcJob>::createManager("main", 5);
+    manageFd = ManageProcessor<ProofCalcJob>::createManager("main", numOfWorker);
 }
 vector<ZZ> ManageProccessorWrapper::calcProof(vector<ProofCalcJob> jobList)
 {
@@ -86,10 +86,17 @@ vector<ZZ> ManageProccessorWrapper::calcProof(vector<ProofCalcJob> jobList)
 string ManageProccessorWrapper::calcProof(const string &jobStr)
 {
     write(manageFd, jobStr.c_str(), jobStr.size()+1);
-    char buf[BUF_SIZE];
-    read(manageFd, buf, BUF_SIZE);
-    string res(buf);
-    return res;
+    char buf[ManageProccessorWrapper::BUF_SIZE+1]; //leave space to add tail '\0'
+    int num;
+    ostringstream oStr;
+    while(true)
+    {
+        num =  read(manageFd, buf, ManageProccessorWrapper::BUF_SIZE);
+        buf[num] = '\0';//add '\0' for output
+        oStr << buf;
+        if(num==0 || buf[num-1]=='\0')break; //if already end with '\0', means have read all data
+    }
+    return oStr.str();
 }
 
 vector<ZZ> ProofCalcClient::calcProof(string url, vector<ProofCalcJob> jobList)

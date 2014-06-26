@@ -12,6 +12,7 @@
 #include <vector>
 #include <stdexcept>
 
+
 class Processor
 {
 protected:
@@ -19,6 +20,7 @@ protected:
     FILE *mFp;
     std::string name;
 public:
+    static const int BUF_SIZE=1048576;
     Processor(int fd):mFd(fd)
     {
         mFp = fdopen(mFd,"rw");
@@ -79,11 +81,11 @@ public:
     WorkerProcessor(int fd,std::string name):Processor(fd,name){}
     std::string work(std::string input)
     {
-        std::cout << "worker " << name <<": " << input << std::endl;
         std::istringstream in(input);
         std::ostringstream out;
         int size,a,b;
         in >> size;
+        std::cout << "worker " << name <<": " << size << std::endl;
         JobType job;
         bool isFirst = true;
         for(int i=0; i<size; ++i)
@@ -146,13 +148,13 @@ public:
         {
             throw std::runtime_error("No worker is added");
         }
-        std::cout << "manager " << name << ": " << input<<std::endl;
-        std::cout << "worker num: " << workerNum<<std::endl;
         std::vector<int> workingFd;
         std::istringstream in(input);
         std::ostringstream out;
         int size,a,b;
         in >> size;
+        std::cout << "manager " << name << ": " << size<<std::endl;
+        std::cout << "worker num: " << workerNum<<std::endl;
         if(size == 0) return std::string();
         std::vector<JobType> jobList;
         for(int i=0; i<size; ++i)
@@ -163,9 +165,12 @@ public:
         }
         int neededWorker = std::min(workerNum,size);
         int oneJobNum = (size-1)/neededWorker + 1;
+        int actualWorker=0;
         for(int index=0; index < neededWorker; index++)
         {
             int num = std::min(oneJobNum, size - index*oneJobNum);
+            if(num <=0)continue;
+            actualWorker++;
             std::ostringstream oWork;
             oWork << num;
             for(int i=0; i < num;++i)
@@ -176,11 +181,10 @@ public:
             std::string workStr = oWork.str();
             write(workerFds[index],workStr.c_str(),workStr.size()+1);
         }
-        char buf[1000];
+        char buf[Processor::BUF_SIZE+1];
         bool isFirst = true;
-        for(int index=0; index < neededWorker; index++)
+        for(int index=0; index < actualWorker; index++)
         {
-            read(workerFds[index],buf,1000);
             if(isFirst)
             {
                 isFirst = false;
@@ -189,7 +193,14 @@ public:
             {
                 out << " ";
             }
-            out << buf;
+            int num;
+            while(true)
+            {
+                num = read(workerFds[index],buf,Processor::BUF_SIZE);
+                buf[num] = '\0';
+                out << buf;
+                if(num==0 || buf[num-1]=='\0')break;
+            }
         }
         return out.str();
     }
