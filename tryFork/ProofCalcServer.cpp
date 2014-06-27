@@ -51,7 +51,7 @@ void testWrapper()
         jobList.push_back(job);
         result.push_back(RSAAccumulatorService::getRSAAccumulator()->publicGenSubsetProof(all, sub));
     }
-    ManageProccessorWrapper proccessor("main",3);
+    ManageProccessorWrapper<ProofCalcJob, ZZ> proccessor("main",3);
     vector<ZZ> workOut = proccessor.calcProof(jobList);
     assert(NUM==workOut.size());
     for(int i=0;i<NUM;++i)
@@ -60,7 +60,7 @@ void testWrapper()
     }
 }
 void startProofCalcServer(int port);
-void http_handle(ManageProccessorWrapper *proccessor, HttpRequest *req, HttpResponse *resp);
+void http_handle(ManageProccessorWrapper<ProofCalcJob, ZZ> *proccessor, HttpRequest *req, HttpResponse *resp);
 
 int main(int argc, char *argv[])
 {
@@ -88,13 +88,13 @@ void startProofCalcServer(int port)
 {
     cout << port << endl;
     HttpServer server(port);
-    ManageProccessorWrapper proccessor("main",5);
+    ManageProccessorWrapper<ProofCalcJob, ZZ> proccessor("main",5);
     boost::function<void(HttpRequest *, HttpResponse *)> handle;
     handle = boost::bind(http_handle, &proccessor, _1, _2);
     server.run(handle);
 }
 
-void http_handle(ManageProccessorWrapper *proccessor, HttpRequest *req, HttpResponse *resp)
+void http_handle(ManageProccessorWrapper<ProofCalcJob, ZZ> *proccessor, HttpRequest *req, HttpResponse *resp)
 {
     string jobStr = req->getFormString("job");
     if (jobStr!="")

@@ -58,69 +58,52 @@ void ProofCalcJob::setSubset(SetType z)
     primeSubset = z;
 }
 
-ManageProccessorWrapper::ManageProccessorWrapper(string name, int numOfWorker)
+void NonProofCalcJob::readFromStream(std::istream &in)
 {
-    manageFd = ManageProcessor<ProofCalcJob>::createManager("main", numOfWorker);
-}
-vector<ZZ> ManageProccessorWrapper::calcProof(vector<ProofCalcJob> jobList)
-{
-    int size = jobList.size();
-    ostringstream oStr;
-    oStr << size;
-    for(vector<ProofCalcJob>::iterator it = jobList.begin(); it != jobList.end(); ++it)
-    {
-        oStr << " ";
-        (*it).writeToStream(oStr);
-    }
-    string resStr = calcProof(oStr.str());
-    istringstream iStr(resStr);
-    vector<ZZ> proofList;
+    int size;
     ZZ tmp;
-    for(int i=0;i<size;++i)
+    primeAll.clear();
+    in >> size;
+    for(int i=0; i<size;++i)
     {
-        iStr >> tmp;
-        proofList.push_back(tmp);
+        in >> tmp;
+        primeAll.insert(tmp);
     }
-    return proofList;
+    in >> v;
 }
-string ManageProccessorWrapper::calcProof(const string &jobStr)
+
+void NonProofCalcJob::writeToStream(std::ostream &out)
 {
-    write(manageFd, jobStr.c_str(), jobStr.size()+1);
-    char buf[ManageProccessorWrapper::BUF_SIZE+1]; //leave space to add tail '\0'
-    int num;
-    ostringstream oStr;
-    while(true)
+    out << primeAll.size();
+    for(SetItType it = primeAll.begin(); it != primeAll.end(); ++it)
     {
-        num =  read(manageFd, buf, ManageProccessorWrapper::BUF_SIZE);
-        buf[num] = '\0';//add '\0' for output
-        oStr << buf;
-        if(num==0 || buf[num-1]=='\0')break; //if already end with '\0', means have read all data
+        out << " " << *it;
     }
+    out << " " << v;
+}
+
+std::string NonProofCalcJob::run()
+{
+    std::ostringstream oStr;
+    RSAAccumulator *accu = RSAAccumulatorService::getRSAAccumulator();
+    accu->setSet(primeAll);
+    ZZ a, d;
+    if(!accu->publicGenNonProof(v, a, d))
+    {
+        cerr << "Non Proof Job Failed to public gen non proof" << endl;
+    }
+    oStr << a << " " << d;
     return oStr.str();
 }
 
-vector<ZZ> ProofCalcClient::calcProof(string url, vector<ProofCalcJob> jobList)
+istream & operator >> (istream &in, NonProofResult &res)
 {
-    int size = jobList.size();
-    ostringstream oStr;
-    oStr << size;
-    for(vector<ProofCalcJob>::iterator it = jobList.begin(); it != jobList.end(); ++it)
-    {
-        oStr << " ";
-        (*it).writeToStream(oStr);
-    }
-    map<string,string> kv;
-    kv["job"] = oStr.str();
-    string resStr = hc.post(url, kv);
-    istringstream iStr(resStr);
-    vector<ZZ> proofList;
-    ZZ tmp;
-    for(int i=0;i<size;++i)
-    {
-        iStr >> tmp;
-        proofList.push_back(tmp);
-    }
-    return proofList;
-    
+    in >> res.a >> res.d;
+    return in;
 }
 
+ostream & operator << (ostream &out, NonProofResult &res)
+{
+    out << res.a << " " << res.d;
+    return out;
+}

@@ -48,7 +48,7 @@ void testClient()
         jobList.push_back(job);
         result.push_back(RSAAccumulatorService::getRSAAccumulator()->publicGenSubsetProof(all, sub));
     }
-    ProofCalcClient client;
+    ProofCalcClient<ProofCalcJob, ZZ> client;
     vector<ZZ> workOut = client.calcProof("http://localhost:8400",jobList);
     assert(NUM==workOut.size());
     for(int i=0;i<NUM;++i)
