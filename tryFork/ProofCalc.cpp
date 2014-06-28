@@ -11,7 +11,7 @@ RSAAccumulator *RSAAccumulatorService::getRSAAccumulator()
     return a;
 }
 RSAAccumulator *RSAAccumulatorService::a = NULL;
-void ProofCalcJob::readFromStream(std::istream &in)
+void ProofCalcJob::readFromStream(istream &in)
 {
     int size;
     ZZ tmp;
@@ -30,7 +30,7 @@ void ProofCalcJob::readFromStream(std::istream &in)
         primeSubset.insert(tmp);
     }
 }
-void ProofCalcJob::writeToStream(std::ostream &out)
+void ProofCalcJob::writeToStream(ostream &out)
 {
     out << primeAll.size();
     for(SetItType it = primeAll.begin(); it != primeAll.end(); ++it)
@@ -43,9 +43,9 @@ void ProofCalcJob::writeToStream(std::ostream &out)
         out << " " << *it;
     }
 }
-std::string ProofCalcJob::run()
+string ProofCalcJob::run()
 {
-    std::ostringstream oStr;
+    ostringstream oStr;
     oStr << RSAAccumulatorService::getRSAAccumulator()->publicGenSubsetProof(primeAll, primeSubset);
     return oStr.str();
 }
@@ -58,7 +58,7 @@ void ProofCalcJob::setSubset(SetType z)
     primeSubset = z;
 }
 
-void NonProofCalcJob::readFromStream(std::istream &in)
+void NonProofCalcJob::readFromStream(istream &in)
 {
     int size;
     ZZ tmp;
@@ -72,7 +72,7 @@ void NonProofCalcJob::readFromStream(std::istream &in)
     in >> v;
 }
 
-void NonProofCalcJob::writeToStream(std::ostream &out)
+void NonProofCalcJob::writeToStream(ostream &out)
 {
     out << primeAll.size();
     for(SetItType it = primeAll.begin(); it != primeAll.end(); ++it)
@@ -82,9 +82,9 @@ void NonProofCalcJob::writeToStream(std::ostream &out)
     out << " " << v;
 }
 
-std::string NonProofCalcJob::run()
+string NonProofCalcJob::run()
 {
-    std::ostringstream oStr;
+    ostringstream oStr;
     RSAAccumulator *accu = RSAAccumulatorService::getRSAAccumulator();
     accu->setSet(primeAll);
     ZZ a, d;
@@ -94,6 +94,14 @@ std::string NonProofCalcJob::run()
     }
     oStr << a << " " << d;
     return oStr.str();
+}
+void NonProofCalcJob::setAll(SetType z)
+{
+    primeAll = z;
+}
+void NonProofCalcJob::setV(NTL::ZZ v)
+{
+    this->v = v;
 }
 
 istream & operator >> (istream &in, NonProofResult &res)

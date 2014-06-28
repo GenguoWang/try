@@ -51,6 +51,8 @@ class NonProofResult
 public:
     ZZ a, d;
 };
+istream & operator >> (istream &in, NonProofResult &res);
+ostream & operator << (ostream &out, NonProofResult &res);
 
 template<typename JobType, typename ResultType>
 class ManageProccessorWrapper
