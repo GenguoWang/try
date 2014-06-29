@@ -59,7 +59,7 @@ void testWrapper()
         assert(workOut[i]==result[i]);
     }
 }
-void startProofCalcServer(int port);
+void startProofCalcServer(int port, int worker);
 void http_handle(ManageProccessorWrapper<ProofCalcJob, ZZ> *proccessor, HttpRequest *req, HttpResponse *resp);
 
 int main(int argc, char *argv[])
@@ -67,15 +67,16 @@ int main(int argc, char *argv[])
     //testWrapper();
     try
     {
-        int port;
+        int port,worker;
         po::options_description desc("Allowed options");
         desc.add_options()
             ("port,p",  po::value<int>(&port)->default_value(8400),"specify port to give http accessory")
+            ("worker,w",  po::value<int>(&worker)->default_value(5),"specify worker number")
             ;
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
 		po::notify(vm);
-        startProofCalcServer(port);
+        startProofCalcServer(port, worker);
     }
     catch(exception &ex)
     {
@@ -84,11 +85,11 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void startProofCalcServer(int port)
+void startProofCalcServer(int port, int worker)
 {
     cout << port << endl;
     HttpServer server(port);
-    ManageProccessorWrapper<ProofCalcJob, ZZ> proccessor("main",5);
+    ManageProccessorWrapper<ProofCalcJob, ZZ> proccessor("main", worker);
     boost::function<void(HttpRequest *, HttpResponse *)> handle;
     handle = boost::bind(http_handle, &proccessor, _1, _2);
     server.run(handle);

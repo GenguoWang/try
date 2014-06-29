@@ -104,6 +104,20 @@ void NonProofCalcJob::setV(NTL::ZZ v)
     this->v = v;
 }
 
+string SubsetNonProofCalcJob::run()
+{
+    ostringstream oStr;
+    RSAAccumulator *accu = RSAAccumulatorService::getRSAAccumulator();
+    accu->setSet(primeAll);
+    ZZ a, d;
+    if(!accu->publicGenNonProof(primeSubset, a, d))
+    {
+        cerr << "Subset Non Proof Job Failed to public gen non proof" << endl;
+    }
+    oStr << a << " " << d;
+    return oStr.str();
+}
+
 istream & operator >> (istream &in, NonProofResult &res)
 {
     in >> res.a >> res.d;

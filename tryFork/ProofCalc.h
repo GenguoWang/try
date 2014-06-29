@@ -18,7 +18,7 @@ public:
 };
 class ProofCalcJob:public JobInterface
 {
-private:
+protected:
     typedef std::set<NTL::ZZ> SetType;
     typedef SetType::iterator SetItType;
     SetType primeAll;
@@ -44,6 +44,12 @@ public:
     virtual std::string run();
     void setAll(SetType z);
     void setV(NTL::ZZ v);
+};
+
+class SubsetNonProofCalcJob:public ProofCalcJob
+{
+public:
+    virtual std::string run();
 };
 
 class NonProofResult
