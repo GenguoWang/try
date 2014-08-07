@@ -1,0 +1,5 @@
+Import('env')
+env.Library('RSAAccumulator','RSAAccumulator.cpp')
+env.Library('ZZ','ZZ.cpp')
+env.Library('PrimeRep','PrimeRep.cpp')
+env.AppendUnique(LIBS=["RSAAccumulator","ZZ","gmp","PrimeRep"])

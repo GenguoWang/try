@@ -1,3 +1,0 @@
-Import('env')
-env.Library('RSAAccumulator','RSAAccumulator.cpp')
-env.AppendUnique(LIBS=["RSAAccumulator"])

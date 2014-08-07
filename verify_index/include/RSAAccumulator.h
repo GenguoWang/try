@@ -1,9 +1,9 @@
-/*
+ /*
  * RSAAccumulator.h
  *
- * Based on J. Li, N. Li, and R. Xue, ÒUniversal Accumulators with Efficient
- * Nonmembership Proofs,Ó in Proceedings of the 5th international conference
- * on Applied Cryptography and Network Security (ACNS), 2007, pp. 253Ð269.
+ * Based on J. Li, N. Li, and R. Xue, ?Universal Accumulators with Efficient
+ * Nonmembership Proofs,? in Proceedings of the 5th international conference
+ * on Applied Cryptography and Network Security (ACNS), 2007, pp. 253?269.
  *
  *  Created on: Mar 18, 2013
  *      Author: jzhou
@@ -12,8 +12,7 @@
 #ifndef RSAACCUMULATOR_H_
 #define RSAACCUMULATOR_H_
 
-#include <NTL/ZZ.h>
-#include <NTL/ZZ_p.h>
+#include "ZZ.h"
 #include <set>
 
 NTL_CLIENT
@@ -24,10 +23,10 @@ public:
 	RSAAccumulator(long keylen);
 
 	RSAAccumulator(RSAAccumulator &a) :
-		_p(a._p), _q(a._q), _n(a._n), _g(a._g), _phi(a._phi) { ZZ_p::init(_n); }
+		_p(a._p), _q(a._q), _n(a._n), _g(a._g), _phi(a._phi) { }
 
 	RSAAccumulator(ZZ p, ZZ q, ZZ g) :
-		_p(p), _q(q), _g(g) { _n = _p * _q; _phi = (_p - 1) * (_q - 1); ZZ_p::init(_n); }
+		_p(p), _q(q), _g(g) { _n = _p * _q; _phi = (_p - 1) * (_q - 1); }
 
 	// set the internal set of values as the input parameter
 	void setSet(std::set<ZZ> &s);
@@ -44,9 +43,13 @@ public:
 	ZZ publicGenProof(ZZ v);
 	//ZZ privateGenProof(ZZ v);
 
-	// generate a proof for a subset, must have called setSet
-	ZZ publicGenSubsetProof(std::set<ZZ> &s);
+	// generate a proof for a subset, must have called setSet.
+	// proof = g^{u/(s1*s2*...)} mod n
+	ZZ publicGenSubsetProof(std::set<ZZ> &s) { return publicGenSubsetProof(_set, s); }
+
 	ZZ publicGenSubsetProof(std::set<ZZ> &all, std::set<ZZ> &partial);
+    ZZ privateGenSubsetProof(std::set<ZZ> &all, std::set<ZZ> &partial);
+	ZZ publicGenSubsetProofMT(const std::set<ZZ> &all, const std::set<ZZ> &partial,int);
 
 	// verify a proof for a subset
 	bool verifySubsetProof(std::set<ZZ> &set, ZZ proof, ZZ c);

@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <NTL/ZZ.h>
+#include <ZZ.h>
 #include "RSAAccumulator.h"
 #include "HttpClient.h"
 #include "Processor.h"

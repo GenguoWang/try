@@ -239,5 +239,6 @@ public:
     virtual void readFromStream(std::istream &in)=0;
     virtual void writeToStream(std::ostream &out)=0;
     virtual std::string run()=0;
+    virtual ~JobInterface(){};
 };
 #endif

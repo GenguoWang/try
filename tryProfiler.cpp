@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <google/profiler.h>
 using namespace std;
 void testMath()
 {
@@ -14,7 +15,9 @@ void testMath()
 }
 int main()
 {
+    ProfilerStart("wgg.prof");
     cout << "hello world" << endl;
     testMath();
+    ProfilerStop();
     return 0;
 }

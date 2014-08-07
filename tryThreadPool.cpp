@@ -1,7 +1,9 @@
 #include "threadpool.hpp"
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <vector>
+#include <google/profiler.h>
 using namespace boost::threadpool;
 using namespace std;
 
@@ -84,12 +86,54 @@ void testWork()
     cout << endl;
 
 }
+void consumeSomeCPUTime1(int input){ 
+  int i = 0; 
+  input++; 
+  while(i++ < 10000){ 
+    i--;  i++;  i--;  i++; 
+  } 
+ }; 
+
+ void consumeSomeCPUTime2(int input){ 
+  input++; 
+  consumeSomeCPUTime1(input); 
+  int i = 0; 
+  while(i++ < 10000){ 
+    i--;  i++;  i--;  i++; 
+  } 
+ }; 
+
+ int stupidComputing(int a, int b){ 
+  int i = 0; 
+  while( i++ < 10000){  
+    consumeSomeCPUTime1(i); 
+  } 
+  int j = 0; 
+  while(j++ < 5000){ 
+    consumeSomeCPUTime2(j); 
+  } 
+  return a+b; 
+ }; 
+
+ int smartComputing(int a, int b){ 
+  return a+b; 
+ }; 
 int main()
 {
+    ProfilerStart("threadpool.prof");
     int val=4;
     testSchedule(val);
     testWithClass();
     testWork();
     cout << val << endl;
+    /*
+int i=0;
+while( i++ < 10){ 
+    printf("Stupid computing return : %d\n",stupidComputing(i, i+1)); 
+    printf("Smart computing return %d\n",smartComputing(i+1, i+2)); 
+  }
+  */
+    sleep(4);
+    ProfilerStop();
     return 0;
 }
