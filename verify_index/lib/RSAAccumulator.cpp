@@ -121,10 +121,33 @@ RSAAccumulator::privateGenSubsetProof(std::set<ZZ> &all, std::set<ZZ> &partial)
 
 	ZZ c = _g;
     ZZ p = 1;
+    double b = get_time();
 	for (std::set<ZZ>::iterator it = result.begin(); it != result.end(); it++) {
-        p = MulMod(p,*it,_phi);
+        //p = MulMod(p,*it,_phi);
+        p *= *it;
 	}
-    c = PowerMod(c,p,_n);
+    double e = get_time();
+    cout << "mul: " <<e-b<<endl;
+    vector<ZZ> mod;
+    vector<ZZ> bits;
+    ZZ pre = _g;
+    while(sign(p))
+    {
+        mod.push_back(pre);
+        bits.push_back(p&1);
+        p >>= 1;
+        //pre = MulMod(pre,pre,_n);
+        SqrMod(pre,pre,_n);
+    }
+    c = 1;
+    cout << "bit: " << bits.size() << endl;
+    for(int i=0;i<bits.size(); ++i)
+    {
+       // cout << "work " << i << endl;
+        if(bits[i]==1) c *= mod[i];
+    }
+    //c = PowerMod(c,p,_n);
+    c %= _n;
 
 	return c;
 }

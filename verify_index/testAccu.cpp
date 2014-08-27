@@ -6,7 +6,7 @@
 #include "PrimeRep.h"
 #include "util.h"
 #include <google/profiler.h>
-const int SET_SIZE = 10000;
+const int SET_SIZE = 100;
 using namespace std;
 int main(int argc, char *argv[])
 {
@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
     cout << proof << endl;
     cout << proof1 << endl;
     cout << proof2 << endl;
+    assert(proof==proof1);
+    assert(proof==proof2);
     ProfilerStop();
 	return 0;
 }
